@@ -18,6 +18,13 @@ def writeToFile(links,company,date,month,year):
 	f = open(os.path.join(BASE_PATH,"links","results_"+comp+"_"+sd+"_"+sm+"_"+sy+'.data'),'a+')
 	for i,j in links:
 		f.write(str(i)+"::"+str(j)+"\n")
+		os.makedirs('data')
+	except Exception as e:
+		pass
+	
+	f = open(os.path.join(BASE_PATH,"data","results_"+comp+"_"+sd+"_"+sm+"_"+sy+'.data'),'a+')
+	for i in links:
+		f.write(str(i)+"\n")
 
 	f.close()
 driver_path = ''
@@ -54,16 +61,20 @@ try:
 			time.sleep(random.randrange(20,30))
 			list_links=[]
 			dat = []
+			time.sleep(random.randrange(15,20))
+			list_links=[]
 			try:
 				next_page = wait.until(EC.element_to_be_clickable((By.ID,'navcnt')))
 				next_page = driver.find_element_by_link_text('Next')
 				element=driver.find_elements_by_xpath("*//h3/a")
+
 				dat = driver.find_elements_by_xpath('//*[@id="rso"]/div/div/div/div/div[1]/span[3]')
 			except Exception as e:
 				print (e)
 				next_page=None
 				#this is for the last page when no next option will be available
 				element=driver.find_elements_by_xpath("*//h3/a")
+
 				dat = driver.find_elements_by_xpath('//*[@id="rso"]/div/div/div/div/div[1]/span[3]')
 				
 			for ele in element:
@@ -74,6 +85,11 @@ try:
 
 			data[i]=list_links
 			list_links = zip(date,list_links)
+
+			for ele in element:
+				list_links.append(ele.get_attribute("href"))
+			data[i]=list_links
+
 			writeToFile(list_links,comp,sd,sm,sy)
 			i+=1
 			if next_page is not None:
@@ -82,6 +98,7 @@ try:
 				break
 except Exception as e:
 	print(e)
+
 finally:
 	print("*"*8+"Finished fetching all the urls"+"*"*8)
 	count=0
