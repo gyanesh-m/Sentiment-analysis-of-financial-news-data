@@ -9,13 +9,13 @@ from selenium import webdriver
 import random,os
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-def writeToFile(links,company,date,month,year):
+def writeToFile(links,webp,company,date,month,year):
 	try:
 		os.makedirs('links')
 	except Exception as e:
 		pass
 	
-	f = open(os.path.join(BASE_PATH,"links","results_"+company+"_"+date+"_"+month+"_"+year+'.data'),'a+')
+	f = open(os.path.join(BASE_PATH,"links","results_"+webp+"_"+company+"_"+date+"_"+month+"_"+year+'.data'),'a+')
 	for i,j in links:
 		f.write(str(i)+"::"+str(j)+"\n")
 	f.close()
@@ -80,7 +80,7 @@ try:
 
 			list_links = zip(date,list_links)
 
-			writeToFile(list_links,comp,sd,sm,sy)
+			writeToFile(list_links,webp,comp,sd,sm,sy)
 			i+=1
 			if next_page is not None:
 				next_page.click()
