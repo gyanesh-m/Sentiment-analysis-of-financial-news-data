@@ -15,17 +15,9 @@ def writeToFile(links,company,date,month,year):
 	except Exception as e:
 		pass
 	
-	f = open(os.path.join(BASE_PATH,"links","results_"+comp+"_"+sd+"_"+sm+"_"+sy+'.data'),'a+')
+	f = open(os.path.join(BASE_PATH,"links","results_"+company+"_"+date+"_"+month+"_"+year+'.data'),'a+')
 	for i,j in links:
 		f.write(str(i)+"::"+str(j)+"\n")
-		os.makedirs('data')
-	except Exception as e:
-		pass
-	
-	f = open(os.path.join(BASE_PATH,"data","results_"+comp+"_"+sd+"_"+sm+"_"+sy+'.data'),'a+')
-	for i in links:
-		f.write(str(i)+"\n")
-
 	f.close()
 driver_path = ''
 
@@ -61,7 +53,6 @@ try:
 			time.sleep(random.randrange(20,30))
 			list_links=[]
 			dat = []
-			time.sleep(random.randrange(15,20))
 			list_links=[]
 			try:
 				next_page = wait.until(EC.element_to_be_clickable((By.ID,'navcnt')))
@@ -84,11 +75,10 @@ try:
 				date.append(d.text);
 
 			data[i]=list_links
-			list_links = zip(date,list_links)
-
 			for ele in element:
 				list_links.append(ele.get_attribute("href"))
-			data[i]=list_links
+
+			list_links = zip(date,list_links)
 
 			writeToFile(list_links,comp,sd,sm,sy)
 			i+=1

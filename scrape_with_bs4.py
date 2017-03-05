@@ -18,7 +18,7 @@ def list_files(path):
     # in folder path
     files = []
     for name in os.listdir(path):
-        if os.path.isfile(os.path.join(path, name)) and name != 'tracker.data' and name not in tracked():
+        if os.path.isfile(os.path.join(path, name)) and name != 'tracker.data' and name != 'empty.txt' and name not in tracked():
             files.append(name)
         else:
         	print("Skipping ",name)
@@ -31,6 +31,7 @@ def make_directory(company):
 		pass	
 
 for file in list_files('links/'):
+	print(file)
 	company = file.split('_')[1]
 	links = [line.rstrip('\n') for line in open('links/'+file)]
 	
