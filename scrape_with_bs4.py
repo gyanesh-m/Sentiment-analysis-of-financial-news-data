@@ -39,18 +39,45 @@ def sc_reuters(bs):
 	content[-1]=content[-1][:n]
 	data.extend(content)
 	return data
+
 def sc_thehindu(bs):
 	t=[]
 	temp=bs.select('div > p')
 	temp2=[j.get_text() for i,j in enumerate(temp) if i<len(temp)-3]
 	t.extend(temp2)
 	return t
+
 def sc_econt(bs):
 	t=[]
 	data=bs.find_all(class_='Normal')
 	t.append([i.get_text() for i in data])
 	return t
-NEWS={'reuters.com':sc_reuters,'thehindu.com':sc_thehindu,'economictimes.indiatimes':sc_econt}
+
+def moneyControl(bs):
+	t = []
+	try:
+		data = bs.find_all(class_=['arti-flow','arti-box'])
+		temp = []
+		for i in data:
+			temp = i.find_all('p')
+		for i in temp:
+			t.append(i.get_text())
+
+	return t
+
+def ndtv(bs):
+	t=[]
+	#profit.ndtv not working :S
+	data = bs.find_all(class_=['ins_storybody','content_text row description','fullstoryCtrl_fulldetails'])
+	print(len(data))
+	y = []
+	for i in data:
+		y = i.find_all('p')
+	for i in y:
+		t.append(i.get_text())
+	return t
+
+NEWS={'reuters.com':sc_reuters,'thehindu.com':sc_thehindu,'economictimes.indiatimes':sc_econt,'moneycontrol.com':moneyControl,'ndtv.com':ndtv}
 for file in list_files('links/'):
 	print(file)
 	company = file.split('_')[2]
@@ -62,26 +89,21 @@ for file in list_files('links/'):
 	content = []
 	for url in links:
 		c,d= url.split('::')
+		if 'khabar.ndtv' in d:
+			continue
 		r = requests.get(d)
 		print("Scraping url ",d)
 		soup = BeautifulSoup(r.content,"html.parser")
+
 		a=NEWS[webp](soup)
-		#head = soup.find_all('h1')
-		# for x in head:
-		# 	a.append(x.text)		
+
 		str1 = ''.join(a)
 		c = datetime.datetime.strptime(c, '%d-%b-%Y')
 		date.append(c)
 		content.append(str1)
 		temp = {c:str1}
-		#print(url)
 		b.update(temp)
-		# with open('scraped_data.data', 'w', encoding='utf-8') as f:
-		#     print(b, file=f)
 
-	# import json
-	# with open('content/result_'+file.split('data')[0]+'.json', 'w') as fp:
-	#     json.dump(b, fp,indent=4)
 	make_directory(company)
 
 	with open('content/'+company+'/raw_'+file.split('.data')[0]+'.pkl', 'wb') as fp:
