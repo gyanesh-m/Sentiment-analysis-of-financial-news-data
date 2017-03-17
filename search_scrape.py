@@ -14,8 +14,12 @@ def writeToFile(links,webp,company,date,month,year):
 		os.makedirs('links')
 	except Exception as e:
 		pass
+	try:
+		os.makedirs(os.path.join(BASE_PATH,'links',str(company),str(webp),str(year)[-2:]))
+	except Exception as e:
+		pass
 	
-	f = open(os.path.join(BASE_PATH,"links","results_"+webp+"_"+company+"_"+date+"_"+month+"_"+year+'.data'),'a+')
+	f = open(os.path.join(BASE_PATH,"links",company,webp,str(year)[-2:],"results_"+webp+"_"+company+"_"+date+"_"+month+"_"+year+'.data'),'a+')
 	for i,j in links:
 		f.write(str(i)+"::"+str(j)+"\n")
 	f.close()
@@ -42,50 +46,51 @@ driver.get(start_url.format(smonth=sm,sday=sd,syear=sy,emonth=em,eday=ed,eyear=e
 data={}
 date=[]
 next_page=""
-wait = WebDriverWait(driver, random.randint(10,20))
+wait = WebDriverWait(driver, random.randint(10,15))
 i=0
-time.sleep(random.randint(8,13))
+time.sleep(random.randint(5,10))
 previous=next_page
 try:
 	while next_page is not None or previous is not None:
-			if i >= 80:
-				break
-			time.sleep(random.randrange(20,30))
-			list_links=[]
-			dat = []
-			list_links=[]
-			try:
-				next_page = wait.until(EC.element_to_be_clickable((By.ID,'navcnt')))
-				next_page = driver.find_element_by_link_text('Next')
-				element=driver.find_elements_by_xpath("*//h3/a")
+		print(i)
+		if i >= 1:#no of pages to browse
+			break
+		#time.sleep(random.randrange(5,10))  #no need for pages = 1
+		list_links=[]
+		dat = []
+		list_links=[]
+		try:
+			next_page = wait.until(EC.element_to_be_clickable((By.ID,'navcnt')))
+			next_page = driver.find_element_by_link_text('Next')
+			element=driver.find_elements_by_xpath("*//h3/a")
 
-				dat = driver.find_elements_by_xpath('//*[@id="rso"]/div/div/div/div/div[1]/span[3]')
-			except Exception as e:
-				print (e)
-				next_page=None
-				#this is for the last page when no next option will be available
-				element=driver.find_elements_by_xpath("*//h3/a")
+			dat = driver.find_elements_by_xpath('//*[@id="rso"]/div/div/div/div/div[1]/span[3]')
+		except Exception as e:
+			print (e)
+			next_page=None
+			#this is for the last page when no next option will be available
+			element=driver.find_elements_by_xpath("*//h3/a")
 
-				dat = driver.find_elements_by_xpath('//*[@id="rso"]/div/div/div/div/div[1]/span[3]')
-				
-			for ele in element:
-				list_links.append(ele.get_attribute("href"))
+			dat = driver.find_elements_by_xpath('//*[@id="rso"]/div/div/div/div/div[1]/span[3]')
 			
-			for d in dat:
-				date.append(d.text);
+		for ele in element:
+			list_links.append(ele.get_attribute("href"))
+		
+		for d in dat:
+			date.append(d.text);
 
-			data[i]=list_links
-			for ele in element:
-				list_links.append(ele.get_attribute("href"))
+		data[i]=list_links
+		for ele in element:
+			list_links.append(ele.get_attribute("href"))
 
-			list_links = zip(date,list_links)
+		list_links = zip(date,list_links)
 
-			writeToFile(list_links,webp,comp,sd,sm,sy)
-			i+=1
-			if next_page is not None:
-				next_page.click()
-			else:
-				break
+		writeToFile(list_links,webp,comp,sd,sm,sy)
+		i+=1
+		if next_page is not None:
+			next_page.click()
+		else:
+			break
 except Exception as e:
 	print(e)
 
