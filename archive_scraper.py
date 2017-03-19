@@ -101,6 +101,7 @@ class Archive_Scraper:
 				print("date",s)
 		
 		return s
+
 	def reuters(self):
 		url="http://www.reuters.com/resources/archive/us/{year}{month}{date}.html"
 		blacklist=['video','#top']
@@ -120,7 +121,7 @@ class Archive_Scraper:
 						print(len(links))
 						for link in links:
 							if(not ([i for i in blacklist if link.get('href').find(i)!=-1])):
-								if( link.get('href').find(self.keyword)!=-1):
+								if(self.search_key(link.get('href').lower(),self.keyword)):
 									index=link.get('href').rfind('/')
 									link="http://www.reuters.com/article"+link.get('href')[index:]
 									print(link)
@@ -156,7 +157,7 @@ class Archive_Scraper:
 				xtree=html.fromstring(page.content)
 				links=xtree.xpath("*//section[@id='pageContent']//li/a/@href")
 				for link in links:
-					if(link.find(self.keyword)!=-1):
+					if(self.search_key(link.lower(),self.keyword)):
 						link='http://economictimes.indiatimes.com'+link
 						date_,month_,year_=final_date.strftime("%d-%b-%Y").split('-')
 						collection.append(date_+'-'+month_+'-'+year_+"::"+link)
@@ -184,7 +185,7 @@ class Archive_Scraper:
 				links=xtree.xpath("*//ul[@class='archive-list']//a/@href")
 				print (len(links))
 				for link in links:
-					if(link.find(self.keyword)!=-1):
+					if(self.search_key(link.lower(),self.keyword)):
 						print(link)
 						date_,month_,year_=final_date.strftime("%d-%b-%Y").split('-')
 						collection.append(date_+'-'+month_+'-'+year_+"::"+link)
@@ -212,13 +213,11 @@ class Archive_Scraper:
 				for link in links:
 					if 'khabar.ndtv' in link or 'hi.ndtv' in link or 'hi.gadgets' in link:
 						continue
-					if(link.find(self.keyword)!=-1):
+					if(self.search_key(link.lower(),self.keyword)):
 						collection.append(self.scrape(link)+'::'+link)
 
 			print("Collected "+str(len(collection))+" urls for "+str(start_date.year-d)+self.keyword)
 			self.writeToFile(collection,"ndtvArchive",self.keyword,self.sd,self.sm,self.sy)
-
-		
 
 	def businessLine(self):
 		base_url="http://www.thehindubusinessline.com/today/?date={date}"
@@ -241,7 +240,7 @@ class Archive_Scraper:
 					links=xtree.xpath("//*[@id='printhide']//a/@href")
 					print(len(links))
 					for link in links:
-						if(link.find(self.keyword)!=-1):
+						if(self.search_key(link.lower(),self.keyword)):
 							print(link)
 							collection.append(str(dt.date().strftime('%d-%b-%Y'))+'::'+link)
 					if dt == end_date:
@@ -252,10 +251,7 @@ class Archive_Scraper:
 			print("Collected "+str(len(collection))+" urls for "+str(start_date.year-d)+self.keyword)
 			self.writeToFile(collection,"businessLineArchive",self.keyword,self.sd,self.sm,self.sy)
 
-			
-
 	def writeToFile(self,links,webp,company,date,month,year):
-		
 		try:
 			dir_name='links/'+company+"/archive"
 			os.makedirs(dir_name)
@@ -266,4 +262,22 @@ class Archive_Scraper:
 		for i in links:
 			f.write(str(i)+"\n")
 		f.close()
+
+	def search_key(self,input_string,word):
+		index=input_string.find(word)
+		if(index!=-1):
+			if(index!=0):
+				low=ord(input_string[index-1])
+			else:
+				low=95
+			if(index+len(word)!=len(input_string)):
+				high=ord(input_string[index+len(word)])
+			else:
+				high=95
+			if( (low<97 or low>122) and ( high<97 or high>122) ):
+				return True
+			else:
+				return self.search_key(input_string[index+len(word):],word)
+		else:
+			return False
 start=Archive_Scraper()
