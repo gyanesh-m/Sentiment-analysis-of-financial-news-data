@@ -106,10 +106,17 @@ class Archive_Scraper:
 		url="http://www.reuters.com/resources/archive/us/{year}{month}{date}.html"
 		blacklist=['video','#top']
 		collection=[]
+		st_d,ed_d=self.sd,self.ed
 		year_month=self.year_m(True)
 		for year,month in year_month:
 			print("Scraping for the Year " + str(year)," Month " +str(month))
-			for d in range(self.sd,self.ed+1):
+			if(int(month)!=self.sm or int(year)!=self.sy):
+				st_d=1
+			if(int(month)!=self.em and int(year)!=self.ey):
+				ed_d=31
+			else:
+				ed_d=self.ed
+			for d in range(st_d,ed_d+1):
 				if(d<10):
 					d="0"+str(d)
 				try:
