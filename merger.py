@@ -1,95 +1,165 @@
 import os
+import glob
 from difflib import SequenceMatcher
-def data_generator(company,option,webs=None,base_path=None):
-			links=[]
-			if(webs!=None):
-				for web in webs:
-					os.chdir(os.path.join(base_path,web))
-					years=[year for year in os.listdir() if year and os.path.isdir(year)]
-					for year in years:
-						os.chdir(os.path.join(base_path,web,year))
-						files=[afile for afile in os.listdir() if afile and not os.path.isdir(afile)]
-						for data_file in files:
-							with open(data_file,'r') as ff:
-								for line in ff:
-									x,y=line.split("::")
-									links.append((x,y))
-			os.chdir(os.path.join(base_path))
-			files_=[i for i in os.listdir() if i not in ignore and not os.path.isdir(i)]
-			for f_name in files_:
-				with open(f_name,'r')as ff:
-					for line in ff:
-							x,y=line.split("::")
-							links.append((x,y))
-				if(option==1 and f_name!='results_'+company):
-					os.rename(f_name,'raw_links/'+f_name)
-			return links
-def sequence_matcher(opt,comp,links_g=None,webs=None,path=None):
-		if(opt==2):
-			links=data_generator(webs=webs,option=opt,base_path=path,company=comp)
-			links.extend(data_generator(option=opt,base_path=os.path.join(path,'archive'),company=comp))
-		elif (opt==1):
-			links=data_generator(option=opt,base_path=path,company=comp)
-		stats={0.2:0,0.4:0,0.6:0,0.8:0,1:0}
-		regret=[]		
-		count=0
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+
+def inp():
+	print("1)Merge File\n2)Get full data\n")
+	i = input()
+	if i == '1':
+		inp = input('Enter the company to merge\n')
+		return inp
+	else:
+		company = input('Enter company for full data processing\n')
+		file = 'results_'+company+'_full.data'
+		links = [line.rstrip('\n') for line in open(os.path.join(BASE_PATH,'links',company,file))]
+		links = list(set(links)) #assuming date will be same for archive as well as google results
 		print(len(links))
-		for i in links:		
-				count+=1
-				print(count,len(links))
-				seq=SequenceMatcher(None,i[1],'')
-				for j in links:
-					if(i!=j):
-						seq.set_seq2(j[1])
-						value=seq.ratio()
-						if(value<=0.2):
-							stats[0.2]+=1
-						elif(value<=0.4):
-							stats[0.4]+=1
-						elif(value<=0.6):
-							stats[0.6]+=1
-						elif(value<=0.8):
-							stats[0.8]+=1
-						elif(value>=0.85):
-							stats[1]+=1
-							links.remove(j)
-							regret.append(j)
-		if(option==1):
-			os.chdir(path)
-		else:
-			os.chdir(BASE_PATH)
-		print(path)
-		f_name='results_'+comp+'.data'
-		with open(f_name,'a+') as f:
+		writeToFile(links,company)
+
+		print("All Done!")
+		return None
+
+def listArchiveFiles(company):
+	for path, subdirs, files in os.walk(os.path.join(BASE_PATH,'links',company,'archive')):
+		if len(files) > 0:
+			return files[0]
+
+def countFiles(company):
+	a = []
+	b = []
+	writeToFile([0],company,'random')#creating random file..function stops working without a file in folder
+	filew = os.path.join(BASE_PATH,'links',company,"results_random_unique.data")
+	for path, subdirs, files in os.walk(os.path.join(BASE_PATH,'links',company)):
+			if len(files) > 0:
+				for i in subdirs:
+					cnt = sum([len(files) for r, d, files in os.walk(os.path.join(BASE_PATH,'links',company,i))])
+					a.append(cnt)
+	os.remove(filew)#removing random file
+	return a				
+
+def listGoogleFiles(company):
+	if company != None:
+		a = []
+		b = []
+		k = 0
+		p = 2
+		s = {}
+		index = 1
+		count = countFiles(company)
+		max_size = len(count)
+
+		for path, subdirs, files in os.walk(os.path.join(BASE_PATH,'links',company)):
+			if len(files) > 0:
+				
+				for i in files:
+					if 'archive' in i.lower():
+						b.append(os.path.join(path,i))
+					else:
+						a.append(os.path.join(path,i))
+
+						if index < max_size :
+							if len(a) == count[index]:
+								temp = []
+								s.update({p:temp+a})
+								a.clear()
+								p+=1
+								index+=1
+						
+		files = []
+		s[1] = b
+		websites = {1:'archive',2:'economictimes.indiatimes.com',3:'moneycontrol.com',4:'ndtv.com',5:'reuters.com',6:'thehindu.com',7:'thehindubusinessline.com'}
+	
+		for key in s:
+			if key == 1:#for archive
+				getUniqueLinks(s[key],websites[key],company)
+			else:
+				getUniqueLinks(s[key],websites[key],company)
+
+		files.clear()
+		for file in os.listdir(os.path.join(BASE_PATH,'links',company)):
+			if file.endswith('.data'):
+				files.append(file)
+		
+		getLinks(files,company)
+		
+
+def writeToFile(links,company,name=None):
+	if name == None:
+		f = open(os.path.join(BASE_PATH,'links',company,"results_"+company+'_unique.data'),'a+')
+	else:
+		f = open(os.path.join(BASE_PATH,'links',company,"results_"+name+'_unique.data'),'a+')
+	for i in links:
+		f.write(str(i)+"\n")
+	f.close()
+
+def getLinks(files,company):
+	#print(files)
+	file = os.path.join(BASE_PATH,'links',company,'results_'+company+'_full.data')
+	with open(file, 'wb') as outfile:
+		for f in files:
+			with open(os.path.join(BASE_PATH,'links',company,f), "rb") as infile:
+				outfile.write(infile.read())
+	return file
+
+def getUniqueLinks(files,website,company):
+	filew = os.path.join(BASE_PATH,'links',company,'results_'+website+'_unique.data')
+	print("Working for: ",website)
+	with open(filew, 'w+') as outfile:
+		for f in files:
+			links = [line.rstrip('\n') for line in open(f)]
+			if website == 'archive':
+				links = checkUnique(company,links)
+				writeToFile(links,company,str(f).split('_')[1].split('.')[0])
 			for i in links:
-				f.write(str(i[0])+"::"+str(i[1]))
-		print("Stats for this file\n\nSimilarity Score(<=) \t occurances")
-		for i in stats:
-			print ('\t'+str(i)+'\t\t\t'+str(stats[i]))
-		print("final count "+str(count)+" urls\n\n" )
-		print("removed "+str(len(regret))+" urls")
-		print(regret)
+				outfile.write(str(i)+"\n")
 
 
-ignore=['empty.txt','tracker.data']	
-os.chdir('links')
-companies=[i for i in os.listdir() if i not in ignore and os.path.isdir(i)]
-BASE_PATH=os.getcwd()
-option=int(input("Select the operation to perform for all existing companies\n 1. Remove duplicate entries from the archives\n 2. Merge archive and google results\n"))
-print (companies)
-for i in companies:
-		if(option==1):
-			os.chdir(os.path.join(BASE_PATH,i+'/archive'))
-			print ("Removing duplicates for "+i)
-			files=[afile for afile in os.listdir() if afile not in ignore and not os.path.isdir(afile)]
-			try:
-				os.mkdir('raw_links')
-			except:
-				pass
-			sequence_matcher(path=os.getcwd(),opt=option,comp=i)				
-		elif(option==2):
-			os.chdir(os.path.join(BASE_PATH,i))
-			websites=[web for web in os.listdir() if web not in ignore and os.path.isdir(web) and web!="archive"]			
-			print(websites)
-			temp_path=os.path.join(BASE_PATH,i)
-			sequence_matcher(webs=websites,path=temp_path,opt=option,comp=i)
+	outfile.close()
+
+def checkUnique(company,links):
+	# if company != None:
+	# 	file = listGoogleFiles(company)
+		
+	# 	links = [line.rstrip('\n') for line in open(file)]
+	stats={0.2:0,0.4:0,0.6:0,0.8:0,1:0}
+	count=0
+	a = len(links)
+	print(a)
+	d = a*a
+	
+
+	c = 0
+	for i in links:		
+		for j in links:
+			if(i!=j):
+				value = SequenceMatcher(None, i, j).ratio()
+				if(value<=0.2):
+					stats[0.2]+=1
+				elif(value<=0.4):
+					stats[0.4]+=1
+				elif(value<=0.6):
+					stats[0.6]+=1
+				elif(value<=0.7):
+					stats[0.8]+=1
+				elif(value>0.8):
+					stats[1]+=1
+					links.remove(j)
+			c+=1
+			b = len(links)*len(links)
+		print("%\r",int((1-(b-c)/d)*100),end='')
+
+	print("Stats for this file\n\nSimilarity Score(<=) \t occurances")
+	for i in stats:
+		print ('\t'+str(i)+'\t\t\t'+str(stats[i]))
+	print("final count ",len(links))
+	
+	return links
+	# if company != None:
+	# 	writeToFile(links,company)
+	# else:
+	# 	return links
+
+
+
+listGoogleFiles(inp())

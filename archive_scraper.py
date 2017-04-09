@@ -206,40 +206,69 @@ class Archive_Scraper:
 		year_month=self.year_m(True)
 		start_date=datetime.date(self.sy,self.sm,self.sd)
 		end_date = datetime.date(self.ey,self.em,self.ed)
-		collection=[]
-		for d in range(start_date.year-int(self.ey) +1):
-			print("Scraping for the year",start_date.year-d)
-			for x in range(start_date.month,end_date.month+1):
-				visit_url=base_url.format(year=start_date.year-d,month=str(x).zfill(2))
-				page=requests.get(visit_url,timeout=None)
-				print(visit_url)
-				xtree=html.fromstring(page.content)
-				
-				links=xtree.xpath("//*[@id='main-content']/ul/li/a/@href")
-				print(len(links))
-				for link in links:
-					if 'khabar.ndtv' in link or 'hi.ndtv' in link or 'hi.gadgets' in link:
-						continue
-					if(self.search_key(link.lower(),self.keyword)):
-						collection.append(self.scrape(link)+'::'+link)
+		
 
-			print("Collected "+str(len(collection))+" urls for "+str(start_date.year-d)+self.keyword)
-			self.writeToFile(collection,"ndtvArchive",self.keyword,self.sd,self.sm,self.sy)
+		for d in range(start_date.year-int(self.ey) +1):
+			collectionitc=[]
+			collectionsun = []
+			collectiontcs = []
+			print("Scraping for the year",start_date.year-d)
+			try:
+				for x in range(start_date.month,end_date.month+1):
+					visit_url=base_url.format(year=start_date.year-d,month=str(x).zfill(2))
+					page=requests.get(visit_url,timeout=None)
+					print(visit_url)
+					xtree=html.fromstring(page.content)
+					
+					links=xtree.xpath("//*[@id='main-content']/ul/li/a/@href")
+					print(len(links))
+					for link in links:
+						if 'khabar.ndtv' in link or 'hi.ndtv' in link or 'hi.gadgets' in link or 'gadgets.ndtv' in link or 'food.ndtv' in link:
+							continue
+						if(link.find('-itc')!=-1 or link.find('itc-')!= -1):
+							collectionitc.append(self.scrape(link)+'::'+link)
+						if(link.find('-tcs')!=-1 or link.find('tcs-')!= -1):
+							collectiontcs.append(self.scrape(link)+'::'+link)
+						if(link.find('sun-pharma')!=-1):
+							collectionsun.append(self.scrape(link)+'::'+link)
+			except Exception as e:
+				print(e)
+				print("---------------------------------ERROR---------------------------------")
+				print("---------------------------------ERROR---------------------------------")
+
+
+			# print("Collected "+str(len(collection))+" urls for "+str(start_date.year-d)+self.keyword)
+			self.writeToFile(collectionitc,"ndtvArchive",'itc',self.sd,self.sm,self.sy)
+			self.writeToFile(collectionsun,"ndtvArchive",'sun-pharma',self.sd,self.sm,self.sy)
+			self.writeToFile(collectiontcs,"ndtvArchive",'tcs',self.sd,self.sm,self.sy)
+
+		
 
 	def businessLine(self):
 		base_url="http://www.thehindubusinessline.com/today/?date={date}"
 		year_month=self.year_m(True)
 		start_date=datetime.date(self.sy,self.sm,self.sd)
-		end_date = datetime.datetime.strptime(str(self.ey)+str(self.em)+str(self.ed), "%Y%m%d")
-		collection=[]
-		flag = False
-		for d in range(start_date.year-int(self.ey) +1):
-			print("Scraping for the year",start_date.year-d)
-			for x in range(start_date.month,end_date.month+1):
-				for j in range(1,32):
-					dt = str(start_date.year-d)+'-'+str(x).zfill(2)+'-'+str(j).zfill(2)
-					dt = datetime.datetime.strptime(dt, "%Y-%m-%d")
-					visit_url=base_url.format(date=dt.date().strftime('%Y-%m-%d'))
+		end_date = datetime.date(self.sy,self.em,self.ed)
+		print(start_date)
+		print(end_date.year)
+		
+	
+		for i in range(start_date.year-int(self.ey)+1):
+			
+			collectionitc=[]
+			collectionsun = []
+			collectiontcs = []
+			collectionon=[]
+			collectionsbi = []
+			collectionhd = []
+			collectionmar = []
+			start_date=datetime.date(self.sy-i,self.sm,self.sd)
+			end_date = datetime.date(self.sy-i,self.em,self.ed)
+			daterange = pd.date_range(start_date, end_date)
+			for d in daterange:
+				try:
+					d  = str(d).split(' ')[0]
+					visit_url=base_url.format(date=d)
 					page=requests.get(visit_url,timeout=None)
 					print(visit_url)
 					xtree=html.fromstring(page.content)
@@ -247,29 +276,53 @@ class Archive_Scraper:
 					links=xtree.xpath("//*[@id='printhide']//a/@href")
 					print(len(links))
 					for link in links:
-						if(self.search_key(link.lower(),self.keyword)):
+						if(link.find('maruti')!=-1):
 							print(link)
-							collection.append(str(dt.date().strftime('%d-%b-%Y'))+'::'+link)
-					if dt == end_date:
-						flag=True;
-						break;
-				if flag:
-					break;
-			print("Collected "+str(len(collection))+" urls for "+str(start_date.year-d)+self.keyword)
-			self.writeToFile(collection,"businessLineArchive",self.keyword,self.sd,self.sm,self.sy)
+							collectionmar.append(str(datetime.datetime.strptime(d,'%Y-%m-%d').strftime('%d-%b-%Y'))+'::'+link)
+						if(link.find('-itc')!=-1 or link.find('itc-')!= -1):
+							print(link)
+							collectionitc.append(str(datetime.datetime.strptime(d,'%Y-%m-%d').strftime('%d-%b-%Y'))+'::'+link)
+						if(link.find('-tcs')!=-1 or link.find('tcs-')!= -1):
+							print(link)
+							collectiontcs.append(str(datetime.datetime.strptime(d,'%Y-%m-%d').strftime('%d-%b-%Y'))+'::'+link)
+						if(link.find('sun-pharma')!=-1):
+							print(link)
+							collectionsun.append(str(datetime.datetime.strptime(d,'%Y-%m-%d').strftime('%d-%b-%Y'))+'::'+link)
+						if(link.find('sbi')!=-1):
+							print(link)
+							collectionsbi.append(str(datetime.datetime.strptime(d,'%Y-%m-%d').strftime('%d-%b-%Y'))+'::'+link)
+						if(link.find('hdfc')!=-1):
+							print(link)
+							collectionhd.append(str(datetime.datetime.strptime(d,'%Y-%m-%d').strftime('%d-%b-%Y'))+'::'+link)
+						if(link.find('ongc')!=-1):
+							print(link)
+							collectionon.append(str(datetime.datetime.strptime(d,'%Y-%m-%d').strftime('%d-%b-%Y'))+'::'+link)
+				except Exception as e:
+					print(e)
+					print("---------------------------------ERROR---------------------------------")
+					print("---------------------------------ERROR---------------------------------")
+
+
+				# print("Collected "+str(len(collection))+" urls for "+self.keyword)
+			self.writeToFile(collectionmar,"businessLineArchive",'maruti suzuki',self.sd,self.sm,self.sy)
+			self.writeToFile(collectionitc,"businessLineArchive",'itc',self.sd,self.sm,self.sy)
+			self.writeToFile(collectionsun,"businessLineArchive",'sun-pharma',self.sd,self.sm,self.sy)
+			self.writeToFile(collectiontcs,"businessLineArchive",'tcs',self.sd,self.sm,self.sy)
+			self.writeToFile(collectionsbi,"businessLineArchive",'sbi',self.sd,self.sm,self.sy)
+			self.writeToFile(collectionon,"businessLineArchive",'ongc',self.sd,self.sm,self.sy)
+			self.writeToFile(collectionhd,"businessLineArchive",'hdfc',self.sd,self.sm,self.sy)
 
 	def writeToFile(self,links,webp,company,date,month,year):
+		BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 		try:
-			dir_name='links/'+company+"/archive"
-			os.makedirs(dir_name)
+			os.makedirs(os.path.join(BASE_PATH,"links",company,'archive'))
 		except Exception as e:
 			pass
-		os.chdir(dir_name)
-		f = open(os.path.join("results_"+webp+"_"+company+"_"+str(date)+"_"+str(month)+"_"+str(year)+'.data'),'a+')
+		
+		f = open(os.path.join(BASE_PATH,"links",company,"archive","results_"+webp+"_"+company+"_"+str(date)+"_"+str(month)+"_"+str(year)+'.data'),'a+')
 		for i in links:
 			f.write(str(i)+"\n")
 		f.close()
-
 	def search_key(self,input_string,word):
 		index=input_string.find(word)
 		if(index!=-1):
