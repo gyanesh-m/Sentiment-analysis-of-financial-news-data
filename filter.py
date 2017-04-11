@@ -1,7 +1,7 @@
 import requests
 import os
 from bs4 import BeautifulSoup
-from scrape_with_bs4 import sc_reuters,sc_econt,sc_thehindu,moneyControl,ndtv
+from scrape_with_bs4 import sc_reuters,sc_econt,sc_thehindu,moneyControl,ndtv,hindu_bl
 from nltk.tokenize import sent_tokenize
 # checks for the presence of a word in a string by checking character before 
 #the start of the word and after the end of the word
@@ -27,7 +27,8 @@ NEWS={
 	'thehindu.com':sc_thehindu,
 	'economictimes.indiatimes':sc_econt,
 	'moneycontrol.com':moneyControl,
-	'ndtv.com':ndtv
+	'ndtv.com':ndtv,
+	'thehindubusinessline.com':hindu_bl
 	}
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 os.chdir(os.path.join(BASE_PATH,'links'))
