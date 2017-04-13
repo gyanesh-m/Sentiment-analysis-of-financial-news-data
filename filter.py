@@ -46,36 +46,38 @@ print(name_change)
 for path, subdirs, files in os.walk(os.path.join(BASE_PATH,'links',company)):
 		#avoids archive subdir and its path
 		if(path.rfind('archive')==-1 and len(files)!=0):
-			links=[]
-			filtered_links=[]
 			print(files)
 			for file in files:
+				filtered_links=[]
 				print("Filtering for "+file)
 				with open(path+'/'+file, 'r') as in_file:
 					links = [line.rstrip('\n') for line in in_file]
 				for key in NEWS:
 					if key in file:
 						for url in links:
-							print(url)
-							#checks for the inurl presence of the company name
-							if(search_key(url.lower(),company.lower())):
-								filtered_links.append(url)
-								print("*"*8+"Passed")
-								continue
-							count=0
-							r = requests.get(url.split('::')[1])
-							soup = BeautifulSoup(r.content,"html.parser")			
-							#extracts content from the respective scraper
-							list_of_sentences=NEWS[key](soup)	
-							tokens=[]
-							for x in list_of_sentences:
-								tokens.extend(sent_tokenize(x))
-							for tk in tokens:
-								if company in tk.lower():
-									count+=1
-							if(count>=2):
-								filtered_links.append(url)
-								print("count-"+str(count))
+							try:
+								print(url)
+								#checks for the inurl presence of the company name
+								if(search_key(url.lower(),company.lower())):
+									filtered_links.append(url)
+									print("*"*8+"Passed")
+									continue
+								count=0
+								r = requests.get(url.split('::')[1])
+								soup = BeautifulSoup(r.content,"html.parser")			
+								#extracts content from the respective scraper
+								list_of_sentences=NEWS[key](soup)	
+								tokens=[]
+								for x in list_of_sentences:
+									tokens.extend(sent_tokenize(str(x)))
+								for tk in tokens:
+									if(search_key(tk.lower(),company)):
+										count+=1
+								if(count>=2):
+									filtered_links.append(url)
+									print("count-"+str(count))
+							except Exception as e:
+								print(e)
 				wfile=open(path+'/'+file+name_change,'w+')
 				for lnk in filtered_links:
 					wfile.write(lnk)
