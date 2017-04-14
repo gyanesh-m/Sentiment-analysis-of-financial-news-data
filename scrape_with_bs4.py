@@ -26,9 +26,12 @@ def list_files(path):
         	print("Skipping ",name)
     return files
 
-def make_directory(company):
+def make_directory(company,path=None):
 	try:
-		os.makedirs('content/'+company)
+		if path == None:
+			os.makedirs('content/'+company)
+		else:
+			os.makedirs('content/'+company+'/'+path)
 	except Exception as e:
 		pass	
 
@@ -93,7 +96,7 @@ def hindu_bl(bs):
 
 if __name__ == '__main__':
 	
-	NEWS={'reuters.com':sc_reuters,'thehindu.com':sc_thehindu,'economictimes.indiatimes':sc_econt,'moneycontrol.com':moneyControl,'ndtv.com':ndtv}
+	NEWS={'reuters.com':sc_reuters,'thehindu.com':sc_thehindu,'economictimes.indiatimes':sc_econt,'moneycontrol.com':moneyControl,'ndtv.com':ndtv,'hindubusinessline.com':hindu_bl}
 	for file in list_files('links/finallinks'):
 		links = [line.rstrip('\n') for line in open('links/finallinks/'+file)]
 		collection={}
@@ -109,10 +112,11 @@ if __name__ == '__main__':
 			b = {}
 			date = []
 			content = []
+			_link = []
 			for url in collection[webp]:
 				c,d= url.split('::')
-				if 'khabar.ndtv' in d:
-					continue
+				# if 'khabar.ndtv' in d:
+				# 	continue
 				r = requests.get(d)
 				print("Scraping url ",d)
 				soup = BeautifulSoup(r.content,"html.parser")
@@ -127,15 +131,18 @@ if __name__ == '__main__':
 				c = datetime.datetime.strptime(c, '%d-%b-%Y')
 				date.append(c)
 				content.append(str1)
+				_link.append(d)
 				temp = {c:str1}
 				b.update(temp)
-			make_directory(company)
-			with open('content/'+company+'/raw_'+file.split('.data')[0]+'_'+webp+'.pkl', 'wb') as fp:
+			make_directory(company,webp)
+			
+			with open('content/'+company+'/'+webp+'/raw_'+file.split('.data')[0]+'_'+webp+'.pkl', 'wb') as fp:
 			    pickle.dump(b, fp)
 			temp = {'date':date,
-					'data':content}
+					'data':content,
+					'url':_link}
 			df = pd.DataFrame(temp)
 			df.set_index('date',inplace=True)
-			df.to_pickle('content/'+company+'/'+file.split('.data')[0]+'_'+webp+'_content.pkl')
-			df.to_csv('content/'+company+'/'+file.split('.data')[0]+'_'+webp+'_content.csv')
+			df.to_pickle('content/'+company+'/'+webp+'/'+file.split('.data')[0]+'_'+webp+'_content.pkl')
+			df.to_csv('content/'+company+'/'+webp+'/'+file.split('.data')[0]+'_'+webp+'_content.csv')
 		tracker(file)
