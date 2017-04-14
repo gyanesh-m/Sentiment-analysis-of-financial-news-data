@@ -17,6 +17,12 @@ def inp():
 		print(len(links))
 		writeToFile(links,company)
 
+		f = open(os.path.join(BASE_PATH,'links','finallinks',"results_"+company+'_unique.data'),'a+')
+		for i in links:
+			f.write(str(i)+"\n")
+		f.close()
+
+
 		print("All Done!")
 		return None
 
@@ -110,7 +116,8 @@ def getUniqueLinks(files,website,company):
 			links = [line.rstrip('\n') for line in open(f)]
 			if website == 'archive':
 				links = checkUnique(company,links)
-				writeToFile(links,company,str(f).split('_')[1].split('.')[0])
+				print(f)
+				writeToFile(links,company,str(f).split('/')[-1].split('_')[1])
 			for i in links:
 				outfile.write(str(i)+"\n")
 

@@ -72,11 +72,14 @@ def ndtv(bs):
 	t=[]
 	#profit.ndtv not working :S
 	data = bs.find_all(class_=['ins_storybody','content_text row description','fullstoryCtrl_fulldetails'])
-	print(len(data))
+	#print(len(data))
 	y = []
 	for i in data:
 		y = i.find_all('p')
 	for i in y:
+		t.append(i.get_text())
+	data = bs.findAll('span',{"itemprop":'articleBody'})
+	for i in data:
 		t.append(i.get_text())
 	return t
 def hindu_bl(bs):
