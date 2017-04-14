@@ -36,8 +36,12 @@ def make_directory(company):
 def sc_reuters(bs):
 	d=bs.find_all(id='article-text')
 	content=[i.get_text() for i in d]
-	n=content[-1].rfind("(")
-	content[-1]=content[-1][:n]
+	try:
+		n=content[-1].rfind("(")
+		content[-1]=content[-1][:n]
+	except Exception as e:
+		print(e)
+#	print (content)
 	return content
 
 def sc_thehindu(bs):
@@ -87,42 +91,48 @@ def hindu_bl(bs):
 if __name__ == '__main__':
 	
 	NEWS={'reuters.com':sc_reuters,'thehindu.com':sc_thehindu,'economictimes.indiatimes':sc_econt,'moneycontrol.com':moneyControl,'ndtv.com':ndtv}
-	for file in list_files('links/'):
-		print(file)
-		company = file.split('_')[2]
-		links = [line.rstrip('\n') for line in open('links/'+file)]
-		webp=file.split('_')[1]
-		print(webp)
-		b = {}
-		date = []
-		content = []
-		for url in links:
-			c,d= url.split('::')
-			if 'khabar.ndtv' in d:
-				continue
-			r = requests.get(d)
-			print("Scraping url ",d)
-			soup = BeautifulSoup(r.content,"html.parser")
+	for file in list_files('links/finallinks'):
+		links = [line.rstrip('\n') for line in open('links/finallinks/'+file)]
+		collection={}
+		for k in NEWS:
+			collection[k]=[]
+		for link in links:
+			for key in NEWS:
+				if key in link:
+					collection[key].append(link)
+		company = file.split('_')[1]
+		for webp in collection:
+			print(webp)
+			b = {}
+			date = []
+			content = []
+			for url in collection[webp]:
+				c,d= url.split('::')
+				if 'khabar.ndtv' in d:
+					continue
+				r = requests.get(d)
+				print("Scraping url ",d)
+				soup = BeautifulSoup(r.content,"html.parser")
+				a=NEWS[webp](soup)
+				str1=''
+				tokens=[]
+				for text in a:
+					tokens.extend(text)
 
-			a=NEWS[webp](soup)
-
-			str1 = ''.join(a)
-			c = datetime.datetime.strptime(c, '%d-%b-%Y')
-			date.append(c)
-			content.append(str1)
-			temp = {c:str1}
-			b.update(temp)
-
-		make_directory(company)
-
-		with open('content/'+company+'/raw_'+file.split('.data')[0]+'.pkl', 'wb') as fp:
-		    pickle.dump(b, fp)
-
-		temp = {'date':date,
-				'data':content}
-
-		df = pd.DataFrame(temp)
-		df.set_index('date',inplace=True)
-		df.to_pickle('content/'+company+'/'+file.split('.data')[0]+'_content.pkl')
-		df.to_csv('content/'+company+'/'+file.split('.data')[0]+'_content.csv')
+				for tk in tokens:
+					str1+=''.join(tk)
+				c = datetime.datetime.strptime(c, '%d-%b-%Y')
+				date.append(c)
+				content.append(str1)
+				temp = {c:str1}
+				b.update(temp)
+			make_directory(company)
+			with open('content/'+company+'/raw_'+file.split('.data')[0]+'_'+webp+'.pkl', 'wb') as fp:
+			    pickle.dump(b, fp)
+			temp = {'date':date,
+					'data':content}
+			df = pd.DataFrame(temp)
+			df.set_index('date',inplace=True)
+			df.to_pickle('content/'+company+'/'+file.split('.data')[0]+'_'+webp+'_content.pkl')
+			df.to_csv('content/'+company+'/'+file.split('.data')[0]+'_'+webp+'_content.csv')
 		tracker(file)
