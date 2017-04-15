@@ -4,6 +4,7 @@ import pandas as pd
 import datetime
 import os
 import _pickle as pickle
+import logging
 
 
 def tracker(filename):
@@ -61,11 +62,13 @@ def sc_econt(bs):
 def moneyControl(bs):
 	t = []
 	try:
-		data = bs.find_all(class_=['arti-flow','arti-box'])
 		temp = []
+		data = bs.find_all(class_=['arti-flow','arti-box','arti-flow clearfix'])
+		logging.info(data)
 		for i in data:
-			temp = i.find_all('p')
+			temp.append(i.find_all('p',text=True))
 		for i in temp:
+			logging.info(i.get_text())
 			t.append(i.get_text())
 	except Exception as e:
 		print(e)
@@ -78,20 +81,29 @@ def ndtv(bs):
 	#print(len(data))
 	y = []
 	for i in data:
-		y = i.find_all('p')
+		y = y + i.find_all('p',text=True)
 	for i in y:
 		t.append(i.get_text())
 	data = bs.findAll('span',{"itemprop":'articleBody'})
-	for i in data:
-		t.append(i.get_text())
+	if len(data) > 0:
+		for i in data:
+			t.append(i.get_text())
+	data = bs.findAll('div',{"itemprop":'articleBody'})
+	
+	if len(data) > 0:
+		for i in data:
+			t.append(i.get_text())
 	return t
 def hindu_bl(bs):
 	t=[]
-	data=bs.find_all(class_='article-text')
+	data = bs.findAll('p',{"class":'body'})
+	#data=bs.find_all(class_='article-text')
+	# for i in data:
+	# 	y=i.find_all('p')
+	
 	for i in data:
-		y=i.find_all('p')
-	for i in y:
 		t.append(i.get_text())
+	
 	return t
 
 if __name__ == '__main__':

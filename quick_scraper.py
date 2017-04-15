@@ -4,8 +4,8 @@ import sys
 import os
 import _pickle as pickle
 import pandas as pd
-sys.path.append("../tut1/tut1/spiders/")
-from scrape_with_bs4 import *
+
+from .scrape_with_bs4 import *
 import datetime
 class ContentSpider(scrapy.Spider):
     name = "yolo"
@@ -44,7 +44,7 @@ class ContentSpider(scrapy.Spider):
                 self.file=file_name
                 for l in links:
                     self.date_,self.url=l.split('::')
-                    request=scrapy.Request(self.url,self.parse)
+                    request=scrapy.Request(self.url,self.parse,dont_filter=True)
                     request.meta['date']=self.date_
                     yield request
     # gets called at the end when all the data has been scraped .
