@@ -42,7 +42,9 @@ class ContentSpider(scrapy.Spider):
                 self.file=file_name
                 for l in links:
                     self.date_,self.url=l.split('::')
-                    yield scrapy.Request(self.url,self.parse)
+                    request=scrapy.Request(self.url,self.parse)
+                    request.meta['date']=self.date_
+                    yield request
     # gets called at the end when all the data has been scraped .
     # It maintains the same folder format for data storage as before.
     def writeTo(self):
@@ -72,7 +74,8 @@ class ContentSpider(scrapy.Spider):
                     tokens.extend(text)
                 for tk in tokens:
                     str1+=''.join(tk)
-                c = datetime.datetime.strptime(self.date_, '%d-%b-%Y')
+                c = datetime.datetime.strptime(response.meta['date'], '%d-%b-%Y')
+                #yield self.logger.info("date -"+str(c)+" #"*15)
                 self.date[key].append(c)
                 self.contents[key].append(str1)
                 self.total_links[key].append(response.url)
