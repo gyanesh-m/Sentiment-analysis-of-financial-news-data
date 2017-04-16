@@ -4,7 +4,6 @@ import sys
 import os
 import _pickle as pickle
 import pandas as pd
-
 from .scrape_with_bs4 import *
 import datetime
 class ContentSpider(scrapy.Spider):
@@ -16,6 +15,7 @@ class ContentSpider(scrapy.Spider):
     url=None
     total_urls=0
     counter=0
+    fault_log=None
     ##these variables store the content scraped
     b={}
     date={}
@@ -35,17 +35,28 @@ class ContentSpider(scrapy.Spider):
         cos=[i.split('_')[1] for i in list_files('links/finallinks')]
         print('\n'+str(cos))
         self.dest_file=input()
+        try:
+            os.mkdir('content/logs/')
+        except:
+            pass
+        today='_'.join(datetime.datetime.today().ctime().split())
+        self.fault_log=open('content/logs/'+self.dest_file+'_log_'+today+'.data','w+')
         for file_name in list_files('links/finallinks'):
             if(self.dest_file.lower() in file_name.lower()):
                 tracker(file_name)
                 print("SCRAPING DATA FOR "+file_name)
-                links = [line.rstrip('\n') for line in open('links/finallinks/'+file_name)]
+                links = [line.rstrip('\n') for line in open('links/finallinks/'+file_name) if line!='\n']
                 self.total_urls=len(links)
                 self.file=file_name
                 for l in links:
-                    self.date_,self.url=l.split('::')
-                    request=scrapy.Request(self.url,self.parse,dont_filter=True)
-                    request.meta['date']=self.date_
+                    try:
+                        self.date_,self.url=l.split('::')
+                        request=scrapy.Request(self.url,self.parse,dont_filter=True)
+                        request.meta['date']=self.date_
+                    except Exception as e:
+                        self.fault_log.write(self.date_+'::'+self.url+'\n')
+                        self.counter+=1
+                        continue
                     yield request
     # gets called at the end when all the data has been scraped .
     # It maintains the same folder format for data storage as before.
@@ -66,11 +77,11 @@ class ContentSpider(scrapy.Spider):
         
 
     def parse(self, response):
-        if(response.status in self.handle_httpstatus_list):
+        if(response.status !=200):
             self.counter+=1
+            self.fault_log.write(response.meta['date']+'::'+self.url+'\n')
         else:
             self.counter+=1
-        
         for key in self.NEWS:
             if key in response.url:
                 bs=BeautifulSoup(response.text,'html.parser')
@@ -92,3 +103,4 @@ class ContentSpider(scrapy.Spider):
                 yield self.logger.info("TOTAL URLS -"+str(self.total_urls)+" #"*12)
                 if(self.counter==self.total_urls):
                     self.writeTo() 
+                    self.fault_log.close()
