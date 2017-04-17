@@ -9,7 +9,10 @@ import logging
 
 def tracker(filename):
 	f = open("links/tracker.data",'a+')
-	f.write(filename+"\n")
+	for i in f:
+		print(i)
+		if str(i) != filename:
+			f.write(filename+"\n")
 	f.close()
 
 def tracked():
@@ -66,7 +69,7 @@ def moneyControl(bs):
 		data = bs.find_all(class_=['arti-flow','arti-box','arti-flow clearfix'])
 		logging.info(data)
 		for i in data:
-			temp.append(i.find_all('p',text=True))
+			temp = temp + (i.find_all('p',text=True))
 		for i in temp:
 			logging.info(i.get_text())
 			t.append(i.get_text())
