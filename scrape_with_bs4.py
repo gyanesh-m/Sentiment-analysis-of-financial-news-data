@@ -67,11 +67,11 @@ def moneyControl(bs):
 	try:
 		temp = []
 		data = bs.find_all(class_=['arti-flow','arti-box','arti-flow clearfix'])
-		logging.info(data)
+		# logging.info(data)
 		for i in data:
 			temp = temp + (i.find_all('p',text=True))
 		for i in temp:
-			logging.info(i.get_text())
+			# logging.info(i.get_text())
 			t.append(i.get_text())
 	except Exception as e:
 		print(e)
