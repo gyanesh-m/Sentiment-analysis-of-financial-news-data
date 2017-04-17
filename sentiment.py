@@ -10,7 +10,6 @@ sid = SentimentIntensityAnalyzer()
 
 def analyze(file):
     df = pd.read_csv(file)
-    # d = iris.head()['date']
     sent = {}
     pos = []
     neg = []
