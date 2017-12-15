@@ -4,11 +4,11 @@ import sys
 import os
 import _pickle as pickle
 import pandas as pd
-from .scrape_with_bs4 import *
+from .title_scrape import *
 import datetime
 class ContentSpider(scrapy.Spider):
     name = "yolo"
-    handle_httpstatus_list = [i for i in range(100,999) if i!=200]
+    handle_httpstatus_list = [i for i in range(400,500) if i!=200]
     BASE_PATH = os.path.dirname(os.path.abspath(__file__))
     date_=None
     file=None
@@ -84,6 +84,7 @@ class ContentSpider(scrapy.Spider):
             self.counter+=1
         for key in self.NEWS:
             if key in response.url:
+                print("FETCHING -",response.url)
                 bs=BeautifulSoup(response.text,'html.parser')
                 content=self.NEWS[key](bs)
                 str1=''
@@ -93,12 +94,15 @@ class ContentSpider(scrapy.Spider):
                 for tk in tokens:
                     str1+=''.join(tk)
                 c = datetime.datetime.strptime(response.meta['date'], '%d-%b-%Y')
-                #yield self.logger.info("date -"+str(c)+" #"*15)
-                self.date[key].append(c)
-                self.contents[key].append(str1)
-                self.total_links[key].append(response.url)
-                temp_={c:str1}
-                self.b[key].update(temp_)
+                if(len(tokens)>0):
+                    #yield self.logger.info("date -"+str(c)+" #"*15)
+                    self.date[key].append(c)
+                    self.contents[key].append(str1)
+                    self.total_links[key].append(response.url)
+                    temp_={c:str1}
+                    self.b[key].update(temp_)
+                else:
+                    self.fault_log.write(str(c)+'::'+response.url+'\n')
                 yield self.logger.info("COUNTER -"+str(self.counter)+" #"*15)
                 yield self.logger.info("TOTAL URLS -"+str(self.total_urls)+" #"*12)
                 if(self.counter==self.total_urls):
