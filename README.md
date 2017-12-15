@@ -9,12 +9,12 @@ Currently it fetches all the urls and scrapes data from the google search result
   * moneycontrol.com
   * thehindu.com.
 
-You have to specify the starting date , ending date ,entity/company name and webpage url.
-
+You have to specify the starting date, ending date, entity/company name and webpage url. Company name is required to be specified only in search_scrape.py. For archive_scraper.py, it iterates over all the names specified in the regexList.
+After the results are fetched ,sentiment of each day's news item is calculated by concatenating all the news articles for a day and taking its average.
 ## File Structure 
 
 	USEFUL_FILES
-  
+      -> regexList- Contains the regex for the company name to enhance search results and get more relevant results.
       -> search_scrape.py- Scrapes urls from the google search results.
       -> filter.py- Filters the relevant urls collected from google search results.
       -> archive_scraper.py - Scrapes urls from archives of various websites.
@@ -22,6 +22,8 @@ You have to specify the starting date , ending date ,entity/company name and web
       -> quick_scraper.py- Scrapes content parallely and faster by sending multiple requests per second.
       -> merger.py- Merges the data collected from google search results and news archive.
       -> sentiment.py - Calculates the sentiment of the collected data.
-	
-	
+      
   
+## Note
+
+* RegexList is used to fetch more relevant urls from the archives and not from the google search results. So there should be consistency in the names of company used across google search ( search_scrape.py ) and those mentioned in the regexList.
