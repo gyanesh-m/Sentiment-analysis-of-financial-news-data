@@ -23,6 +23,7 @@ class ContentSpider(scrapy.Spider):
     total_links={}
     NEWS={'reuters.com':sc_reuters,'thehindu.com':sc_thehindu,'economictimes.indiatimes':sc_econt,
     'moneycontrol.com':moneyControl,'ndtv.com':ndtv,'hindubusinessline.com':hindu_bl}
+    DATA_DIR = os.path.join(os.getcwd(),'..','data')
     #initialises the data types with the respective keys and empty list/dictionary
     for key in NEWS:
         date[key]=[]
@@ -40,12 +41,12 @@ class ContentSpider(scrapy.Spider):
         except:
             pass
         today='_'.join(datetime.datetime.today().ctime().split())
-        self.fault_log=open('content/logs/'+self.dest_file+'_log_'+today+'.data','w+')
+        self.fault_log=open(os.path.join(DATA_DIR,'content/logs/'+self.dest_file+'_log_'+today+'.data','w+'))
         for file_name in list_files('links/finallinks'):
             if(self.dest_file.lower() in file_name.lower()):
                 tracker(file_name)
                 print("SCRAPING DATA FOR "+file_name)
-                links = [line.rstrip('\n') for line in open('links/finallinks/'+file_name) if line!='\n']
+                links = [line.rstrip('\n') for line in open(os.path.join(DATA_DIR,'links/finallinks/'+file_name)) if line!='\n']
                 self.total_urls=len(links)
                 self.file=file_name
                 for l in links:
@@ -64,7 +65,7 @@ class ContentSpider(scrapy.Spider):
         company=self.dest_file
         for webp in self.date:
             make_directory(company,webp)
-            with open('content/'+company+'/'+webp+'/raw_'+self.file.split('.data')[0]+'_'+webp+'.pkl', 'wb') as fp:
+            with open(os.path.join(DATA_DIR,'content/'+company+'/'+webp+'/raw_'+self.file.split('.data')[0]+'_'+webp+'.pkl'), 'wb') as fp:
                 pickle.dump(self.b[webp], fp)
             temp = {'date':self.date[webp],
                     'data':self.contents[webp],
@@ -72,8 +73,8 @@ class ContentSpider(scrapy.Spider):
                     }
             df = pd.DataFrame(temp)
             df.set_index('date',inplace=True)
-            df.to_pickle('content/'+company+'/'+webp+'/'+self.file.split('.data')[0]+'_'+webp+'_content.pkl')
-            df.to_csv('content/'+company+'/'+webp+'/'+self.file.split('.data')[0]+'_'+webp+'_content.csv')
+            df.to_pickle(os.path.join(DATA_DIR,'content/'+company+'/'+webp+'/'+self.file.split('.data')[0]+'_'+webp+'_content.pkl'))
+            df.to_csv(os.path.join(DATA_DIR,'content/'+company+'/'+webp+'/'+self.file.split('.data')[0]+'_'+webp+'_content.csv'))
         
 
     def parse(self, response):

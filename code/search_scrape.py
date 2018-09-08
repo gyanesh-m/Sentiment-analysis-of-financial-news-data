@@ -8,10 +8,11 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium import webdriver
 import random,os
 
-BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+BASE_PATH = os.path.join(os.getcwd(),'..','data')
+DRIVER_PATH = os.path.join(os.getcwd(),'..')
 def writeToFile(links,webp,company,date,month,year):
 	try:
-		os.makedirs('links')
+		os.makedirs(os.path.join(BASE_PATH,'links'))
 	except Exception as e:
 		pass
 	try:
@@ -23,12 +24,13 @@ def writeToFile(links,webp,company,date,month,year):
 	for i,j in links:
 		f.write(str(i)+"::"+str(j)+"\n")
 	f.close()
+
 driver_path = ''
 
 if os.name == 'nt':
-	driver_path = os.path.join(os.path.dirname(BASE_PATH),"Scripts")+'\chromedriver.exe'
+	driver_path = os.path.join(DRIVER_PATH,'chromedriver.exe')
 elif os.name == 'posix':
-	driver_path = os.environ['HOME']+'/beautiful_soup/chromedriver'
+	driver_path = os.path.join(DRIVER_PATH,'chromedriver')
 else:
 	driver_path = None
 

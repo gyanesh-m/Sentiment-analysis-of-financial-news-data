@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import os
 
-BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+BASE_PATH = os.path.join(os.getcwd(),'..','data')
 
 sid = SentimentIntensityAnalyzer()
 
@@ -34,9 +34,12 @@ def analyze(file):
     #print(df.head())
 
 if __name__ == '__main__':
-    i = input("Enter the company\n[hdfc,maruti-suzuki,itc,tcs,sbi,ongc,sun-pharma\n")
-
-    for path, subdirs, files in os.walk(os.path.join(BASE_PATH,'content',i)):
+    list_files = os.listdir(os.path.join(BASE_PATH,'content'))
+    print("Select the folder number to generate sentiment for.")
+    for i,j in enumerate(list_files):
+        print(str(i)+' - ' + j)
+    file_number = input()
+    for path, subdirs, files in os.walk(os.path.join(BASE_PATH,'content',list_files[file_number])):
         for f in files:
             if f.endswith('.csv'):
                 f = os.path.join(BASE_PATH,'content',i,f.split('_')[3],f)

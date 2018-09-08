@@ -359,7 +359,7 @@ class Archive_Scraper:
 			self.writeToFile(self.collection,"businessLineArchive",self.sd,self.sm,self.sy)
 #change for others also for write to file definition
 	def writeToFile(self,links,webp,date,month,year):
-		BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+		BASE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','data')
 		for company in links:
 			try:
 				os.makedirs(os.path.join(BASE_PATH,"links",company,'archive'))
@@ -381,7 +381,7 @@ class Archive_Scraper:
 	def getRegex(self):
 		relist={}
 		collection={}
-		with open('regexList','r+') as fi:
+		with open(os.path.join(os.getcwd(),'..','regexList',),'r+') as fi:
 			for line in fi:
 				try:
 					temp=line.split("::")

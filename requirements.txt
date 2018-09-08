@@ -1,0 +1,8 @@
+lxml==4.2.3
+selenium==3.13.0
+numpy==1.12.1
+requests==2.18.4
+nltk==3.3
+pandas==0.23.0
+Scrapy==1.5.1
+beautifulsoup4==4.6.3
