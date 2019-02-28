@@ -3,6 +3,13 @@ import glob
 from difflib import SequenceMatcher
  
 class Merger(object):
+	"""
+	It does two functions.
+	1. Merges all the different runs inside the archive folder of a company,with the 
+	   relevant google search results if they are also present.
+	2. Filters the final list of urls by removing the duplicate urls.
+	"""
+
 	def __init__(self):
 		self.base_path=	os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','data')
 
@@ -10,15 +17,15 @@ class Merger(object):
 		print("1)Merge File\n2)Get full data\n")
 		i = input()
 		if i == '1':
-			inp = input('Enter the company to merge\n')
-			return inp
+			self.listGoogleFiles()
 		else:
-			company = input('Enter company for full data processing\n')
+			print([ i for i in os.listdir(os.path.join(self.base_path,'links')) if 'empty.txt' not in i])
+			company = input('\nEnter company for full data processing:\n')
 			file = 'results_'+company+'_full.data'
 			links = [line.rstrip('\n') for line in open(os.path.join(self.base_path,'links',company,file))]
 			links = list(set(links)) #assuming date will be same for archive as well as google results
 			print(len(links))
-			writeToFile(links,company)
+			self.writeToFile(links,company)
 
 			f = open(os.path.join(self.base_path,'links','finallinks',"results_"+company+'_unique.data'),'a+')
 			for i in links:
@@ -168,10 +175,7 @@ class Merger(object):
 		print("final count ",len(links))
 		
 		return links
-		# if company != None:
-		# 	writeToFile(links,company)
-		# else:
-		# 	return links
 
 merge_object = Merger()
-merge_object.listGoogleFiles()
+merge_object.inp()
+# merge_object.listGoogleFiles()
