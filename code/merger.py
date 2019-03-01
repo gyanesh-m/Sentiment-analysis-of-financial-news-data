@@ -10,31 +10,34 @@ class Merger(object):
 	2. Filters the final list of urls by removing the duplicate urls.
 	"""
 
-	def __init__(self):
+	def __init__(self,enames):
 		self.base_path=	os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','data')
+		self.comp_list = enames
+		# Merge all files
+		self.listGoogleFiles()
+		#Get full data
+		self.inp()
 
 	def inp(self):
-		print("1)Merge File\n2)Get full data\n")
-		i = input()
-		if i == '1':
-			self.listGoogleFiles()
-		else:
-			print([ i for i in os.listdir(os.path.join(self.base_path,'links')) if 'empty.txt' not in i])
-			company = input('\nEnter company for full data processing:\n')
+
+		for company in self.comp_list:
+			print("Getting full data for:",company)
 			file = 'results_'+company+'_full.data'
 			links = [line.rstrip('\n') for line in open(os.path.join(self.base_path,'links',company,file))]
 			links = list(set(links)) #assuming date will be same for archive as well as google results
 			print(len(links))
 			self.writeToFile(links,company)
-
-			f = open(os.path.join(self.base_path,'links','finallinks',"results_"+company+'_unique.data'),'a+')
+			final_link = os.path.join(self.base_path,'final_links')
+			if(not os.path.exists(final_link)):
+				os.makedirs(final_link)
+				print("made it")
+			f = open(os.path.join(final_link,"results_"+company+'_unique.data'),'a+')
 			for i in links:
 				f.write(str(i)+"\n")
 			f.close()
-
-
-			print("All Done!")
-			return None
+			print("Done for:",company)
+		print("All Done!")
+		return None
 
 	def listArchiveFiles(self,company):
 		for path, subdirs, files in os.walk(os.path.join(self.base_path,'links',company,'archive')):
@@ -55,52 +58,51 @@ class Merger(object):
 		return a				
 
 	def listGoogleFiles(self):
-		print("Enter company name to merge results for among ")
-		print([ i for i in os.listdir(os.path.join(self.base_path,'links')) if 'empty.txt' not in i])
-		company=input()
-		if company != None:
-			a = []
-			b = []
-			k = 0
-			p = 2
-			s = {}
-			index = 1
-			count = self.countFiles(company)
-			max_size = len(count)
+		for company in self.comp_list:
+			print("Merging files for:",company)
+			if company != None:
+				a = []
+				b = []
+				k = 0
+				p = 2
+				s = {}
+				index = 1
+				count = self.countFiles(company)
+				max_size = len(count)
 
-			for path, subdirs, files in os.walk(os.path.join(self.base_path,'links',company)):
-				if len(files) > 0:
-					
-					for i in files:
-						if 'archive' in i.lower():
-							b.append(os.path.join(path,i))
-						else:
-							a.append(os.path.join(path,i))
+				for path, subdirs, files in os.walk(os.path.join(self.base_path,'links',company)):
+					if len(files) > 0:
+						
+						for i in files:
+							if 'archive' in i.lower():
+								b.append(os.path.join(path,i))
+							else:
+								a.append(os.path.join(path,i))
 
-							if index < max_size :
-								if len(a) == count[index]:
-									temp = []
-									s.update({p:temp+a})
-									a.clear()
-									p+=1
-									index+=1
-							
-			files = []
-			s[1] = b
-			websites = {1:'archive',2:'economictimes.indiatimes.com',3:'moneycontrol.com',4:'ndtv.com',5:'reuters.com',6:'thehindu.com',7:'thehindubusinessline.com'}
-		
-			for key in s:
-				if key == 1:#for archive
-					self.getUniqueLinks(s[key],websites[key],company)
-				else:
-					self.getUniqueLinks(s[key],websites[key],company)
-
-			files.clear()
-			for file in os.listdir(os.path.join(self.base_path,'links',company)):
-				if file.endswith('.data'):
-					files.append(file)
+								if index < max_size :
+									if len(a) == count[index]:
+										temp = []
+										s.update({p:temp+a})
+										a.clear()
+										p+=1
+										index+=1
+								
+				files = []
+				s[1] = b
+				websites = {1:'archive',2:'economictimes.indiatimes.com',3:'moneycontrol.com',4:'ndtv.com',5:'reuters.com',6:'thehindu.com',7:'thehindubusinessline.com'}
 			
-			self.getLinks(files,company)
+				for key in s:
+					if key == 1:#for archive
+						self.getUniqueLinks(s[key],websites[key],company)
+					else:
+						self.getUniqueLinks(s[key],websites[key],company)
+
+				files.clear()
+				for file in os.listdir(os.path.join(self.base_path,'links',company)):
+					if file.endswith('.data'):
+						files.append(file)
+				
+				self.getLinks(files,company)
 			
 
 	def writeToFile(self,links,company,name=None):
@@ -176,6 +178,6 @@ class Merger(object):
 		
 		return links
 
-merge_object = Merger()
-merge_object.inp()
+# merge_object = Merger()
+# merge_object.inp()
 # merge_object.listGoogleFiles()

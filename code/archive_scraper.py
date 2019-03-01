@@ -18,39 +18,12 @@ logging.basicConfig(
 	 the starting and ending dates are inclusive
 '''
 class Archive_Scraper:
-	def __init__(self):
-		print("#"*8+" Enter the details to scrape separated by SPACE.")
-		sd,sm,sy=input("Enter starting day month year ").split(" ")
-		ed,em,ey=input("Enter ending day month year ").split(" ")
-		#self.keyword=input("Enter company data to scrape -")
-		option=int(input("Enter archive to scrape \n 1.reuters.com \n 2.Economictimes \n 3.thehindu "+
-							"\n 4.NDTV \n 5.BusinessLine\n"))
-		self.sm=int(sm)
-		self.sy=int(sy)
-		self.em=int(em)
-		self.ey=int(ey)
-		self.sd=int(sd)
-		self.ed=int(ed)
-		self.relist,self.collection=self.getRegex()
+	def __init__(self,start_dt,end_dt,path):
 
-		if(option==2):
-			print("Scraping from Economictimes")
-			self.econ_times()
-		elif(option==1):
-			print("Scraping from reuters")
-			self.reuters()
-		elif(option==3):
-			print("Scraping from thehindu")
-			self.thehindu()
-		elif(option==4):
-			print("NDTV Yolo")
-			self.ndtv()
-		elif(option==5):
-			print("BusinessLine")
-			self.businessLine()
-		elif (option==6):
-			print("Business Standard")
-			self.business_std()
+		self.sd,self.sm,self.sy=start_dt
+		self.ed,self.em,self.ey=end_dt
+		self.relist,self.collection=self.getRegex(path)
+
 	def generate_ym_pair(self,y,sm,em,need_zero):
 		year_mon=[]
 		for m in range(sm,em+1):
@@ -378,10 +351,10 @@ class Archive_Scraper:
 			return True
 		else:
 			return False
-	def getRegex(self):
+	def getRegex(self,path):
 		relist={}
 		collection={}
-		with open(os.path.join(os.getcwd(),'..','regexList',),'r+') as fi:
+		with open(os.path.join(path),'r+') as fi:
 			for line in fi:
 				try:
 					temp=line.split("::")
@@ -400,4 +373,4 @@ class Archive_Scraper:
 		for i in count:
 			print(i+" Collected -"+str(count[i]))
 		print("Total Urls collected-"+str(total))
-start=Archive_Scraper()
+
