@@ -1,5 +1,5 @@
 # Sentiment-analysis-of-financial-news-data
-This is part of a study oriented project for 6th sem 2016-2017
+This was developed as part of a study oriented project for 6th sem 2016-2017. It has been evolving since then.
 
 Currently it fetches all the urls and scrapes data from the google search results and news archives of  
   * economictimes.indiatimes.com
@@ -9,8 +9,6 @@ Currently it fetches all the urls and scrapes data from the google search result
   * moneycontrol.com
   * thehindu.com.
 
-You have to specify the starting date, ending date, entity/company name and webpage url. Company name is required to be specified only in search_scrape.py. For archive_scraper.py, it iterates over all the names specified in the regexList.
-After the results are fetched ,sentiment of each day's news item is calculated by concatenating all the news articles for a day and taking its average.
 ## Setup
 Download the chrome driver from here [link](http://chromedriver.chromium.org/downloads).
 
@@ -20,6 +18,45 @@ To setup the dependencies, do the following:
 ```
 pip install -r requirements.txt.
 ```
+## Usage
+Currently the pipeline is available till merging step. **Scrapy and sentiment integration are to be done.**
+
+The complete help to use the following repo is as follows:
+```
+usage: parser.py [-h] -s START -e END -w [WEB [WEB ...]] [-r REGEXP]
+
+Runs the entire pipeline from scraping to extracting sentiments.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s START, --start START
+                        Start date,format-(dd/mm/yy)
+  -e END, --end END     End date,format-(dd/mm/yy)
+  -w [WEB [WEB ...]], --web [WEB [WEB ...]]
+                        Specify the website number to scrape from separated by space						
+                        0=economictimes.indiatimes.com						
+                        1=reuters.com						
+                        2=ndtv.com						
+                        3=thehindubusinessline.com						
+                        4=moneycontrol.com						
+                        5=thehindu.com
+  -r REGEXP, --regexp REGEXP
+                        Complete path to the regex list file for companies. 
+                        For template refer regesList file at root directory of this repo.
+                         By default, it runs the regexList file present at root directory of this repo.
+```
+A sample run from **01/01/2014** to **01/10/2014** for 
+* economictimes
+* reuters
+* thehindubusinessline 
+
+
+would be given as follows:
+```
+python parser.py -s 01/01/2014 -e 01/10/2014 -w 0 1 3
+```
+Note: This assumes that the companies for which the data have to be fetched are specified in the default file,regexList. If user wants to specify some other file, it can be provided by using the **-r** parameter. Make sure to follow the template as given in regexList file.
+
 ## File Structure
 ```
 .
@@ -27,21 +64,28 @@ pip install -r requirements.txt.
 │   ├── archive_scraper.py
 │   ├── filter.py
 │   ├── merger.py
-│   ├── quick_scraper.py
-│   ├── scrape_with_bs4.py
+|   ├── parser.py
+│   ├── quick_scraper
+│   │   ├── quick_scraper
+│   │   │   ├── __init__.py
+|   |   |   ..   
+│   │   │   ├── settings.py
+│   │   │   └── spiders
+│   │   │       ├── __init__.py
+│   │   │       ├── quick_scraper.py
+│   │   │       └── scrape_with_bs4.py
+│   │   └── scrapy.cfg
 │   ├── search_scrape.py
 │   └── sentiment.py
 ├── data
-│   ├── content
-│   │   └── empty.txt
-│   ├── empty.txt
-│   └── links
-│       └── empty.txt
+│   └── empty.txt
 ├── LICENSE
 ├── README.md
 ├── regexList
 ├── requirements.txt
 └── tracker.data
+
+
 ```
 
 ## File Description 
