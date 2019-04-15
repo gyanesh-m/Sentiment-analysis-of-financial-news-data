@@ -104,3 +104,8 @@ Note: This assumes that the companies for which the data have to be fetched are 
 ## Note
 
 * RegexList is used to fetch more relevant urls from the archives and not from the google search results. So there should be consistency in the names of company used across google search ( search_scrape.py ) and those mentioned in the regexList.
+
+## Contribute
+
+If you would like to contribute to this repo or have any ideas to make this better, feel free to submit a pull request or contact me at gyaneshmalhotra@gmail.com.
+For starters, there are some tasks available in the project tab of this repo on which you can start working on.
