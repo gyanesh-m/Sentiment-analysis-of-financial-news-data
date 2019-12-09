@@ -107,5 +107,5 @@ Note: This assumes that the companies for which the data have to be fetched are 
 
 ## Contribute
 
-If you would like to contribute to this repo or have any ideas to make this better, feel free to submit a pull request or contact me at gyaneshmalhotra@gmail.com.
+If you would like to contribute to this repo or have any ideas to make this better, feel free to submit a pull request or contact me at gyaneshmalhotra [at] gmail [dot] com.
 For starters, there are some tasks available in the project tab of this repo on which you can start working on.
