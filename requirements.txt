@@ -1,6 +1,6 @@
 lxml==4.2.3
 selenium==3.13.0
-numpy==1.12.1
+numpy==1.22.0
 requests==2.20.0
 nltk==3.4.5
 pandas==0.23.0
